@@ -5,6 +5,7 @@ import android.os.Environment
 import android.support.v4.app.Fragment
 import android.util.Log
 import id.mncplay.cameratest.commons.RxBaseActivity
+import id.mncplay.cameratest.commons.RxBus
 import rebus.permissionutils.PermissionEnum
 import rebus.permissionutils.PermissionManager
 import java.io.File
@@ -19,8 +20,25 @@ class MainActivity : RxBaseActivity() {
         if (savedInstanceState == null){
             checkDir()
             getPermission()
+            manageSubscription()
             changeFragment(CameraFragment(), "camera")
         }
+    }
+
+    fun manageSubscription(){
+        subscriptions.add(RxBus.get().toObservable().subscribe{
+            event -> manageBus(event)
+        })
+    }
+
+    fun manageBus(event:Any){
+        when(event){
+            is Data -> processData(event)
+        }
+    }
+
+    fun processData(event:Data){
+        Log.d("dodol", "$event")
     }
 
     fun changeFragment(f: Fragment, tag: String) {

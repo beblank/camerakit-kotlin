@@ -16,12 +16,18 @@ import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import com.wonderkiln.camerakit.CameraKitImage
+import io.reactivex.Observable
+import io.reactivex.ObservableOnSubscribe
+import io.reactivex.Scheduler
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.text.DateFormat
 import java.util.*
+import id.mncplay.cameratest.commons.RxBus
 
 
 open class CameraControls @JvmOverloads constructor(
@@ -80,23 +86,33 @@ open class CameraControls @JvmOverloads constructor(
 
     private fun onTouchCapture() {
         cameraView?.captureImage {
-            imageCapture(it)
+            imageCapture(it, dir + getImgName(), getDateTime())
+//                    .subscribeOn(Schedulers.io())
+//                    .observeOn(AndroidSchedulers.mainThread())
+//                    .doOnComplete { Log.d("dodol", "complete - $it") }
+//                    .subscribe {
+//                        Log.d("dodol", "complete - $it")
+//                    }
         }
     }
 
-    private fun imageCapture(image: CameraKitImage) {
+    private fun imageCapture(image: CameraKitImage, filename:String, dateTime:String) {
+        //Observable.create(ObservableOnSubscribe<File>{
         val jpeg = image.bitmap
-        val photo = File(Environment.getExternalStorageDirectory(), dir + getImgName())
+        val photo = File(Environment.getExternalStorageDirectory(), filename)
         try {
             val fOut = FileOutputStream(photo)
             jpeg.compress(Bitmap.CompressFormat.JPEG, 25, fOut)
             fOut.flush()
             fOut.close()
-        } catch (e:IOException){
+            RxBus.get().send(Data(filename, dateTime))
+            Log.d("dodol", "$filename $dateTime")
+        } catch (e: IOException) {
             Log.e("dodol", "Exception in photo capture to image $e")
         }
-        Log.d("dodol", "${getDateTime()} - $jpeg")
+        //})
     }
+
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
