@@ -21,7 +21,7 @@ class MainActivity : RxBaseActivity() {
             checkDir()
             getPermission()
             manageSubscription()
-            changeFragment(CameraFragment(), "camera")
+            changeFragment(MenuFragment(), "camera")
         }
     }
 
@@ -34,6 +34,7 @@ class MainActivity : RxBaseActivity() {
     fun manageBus(event:Any){
         when(event){
             is Data -> processData(event)
+            "camera" -> changeFragment(CameraFragment(), "camera")
         }
     }
 
